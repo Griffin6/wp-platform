@@ -3,8 +3,8 @@ namespace Platform;
 
 use Platform\Filter;
 
-class Setup {
-
+class Setup
+{
     protected static $caught_errors = false;
     protected static $platform_path;
     protected static $root_path;
@@ -88,6 +88,21 @@ class Setup {
         self::$lang = get_current_blog_id();
         self::$salt = NONCE_SALT;
 
+        //default debug
+        if (function_exists('env')) {
+            if ($email = env('DEBUG_EMAIL')) {
+                self::debug($email);
+            }
+        }
+
+        //default email from
+        if (function_exists('env')) {
+            if ($email = env('MAIL_FROM')) {
+                $name = env('MAIL_NAME');
+                self::emailFrom($email, $name);
+            }
+        }
+
         //setup request
         Request::setup();
 
@@ -152,8 +167,10 @@ class Setup {
      */
     public static function sessionStart()
     {
-        if (!session_id()) {
-            session_start();
+        if (!headers_sent()) {
+            if (!session_id()) {
+                session_start();
+            }
         }
     }
 
